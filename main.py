@@ -9,12 +9,12 @@ from pathlib import Path
 #from streamlit_folium import st_folium 
 #import folium
 
-root_path = Path()
-ccs_path = list(root_path.glob("**/style.css"))[0]
+css_path = Path("style.css").resolve()
+css_path = str(css_path)
 
 st.set_page_config(layout="wide", initial_sidebar_state='expanded')
 
-with open(ccs_path) as f:
+with open(css_path) as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 # DEFAULTS
