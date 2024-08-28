@@ -3,15 +3,18 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from pathlib import Path
 
 # for the map, has to be installed (pip install streamlit_folium)
 #from streamlit_folium import st_folium 
 #import folium
 
+root_path = Path()
+ccs_path = list(root_path.glob("**/style.css"))[0]
 
 st.set_page_config(layout="wide", initial_sidebar_state='expanded')
 
-with open('style.css') as f:
+with open(ccs_path) as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 # DEFAULTS
