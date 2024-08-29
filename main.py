@@ -9,12 +9,12 @@ from pathlib import Path
 #from streamlit_folium import st_folium 
 #import folium
 
-root_path = Path()
-ccs_path = list(root_path.glob("**/style.css"))[0]
+css_path = Path("style.css").resolve()
+css_path = str(css_path)
 
 st.set_page_config(layout="wide", initial_sidebar_state='expanded')
 
-with open(ccs_path) as f:
+with open(css_path) as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 # DEFAULTS
@@ -24,9 +24,12 @@ rent_default = 98000
 tax_perc_default = 21
 
 buffer_default = 50000
-band_expense_default = 30000
+band_expense_default = 21000
 other_expenses_default = 0
 
+esner_ticket_price_default = 500
+esncard_holder_ticket_price_default = 650
+standard_ticket_price_default = 750
 
 
 # SIDEBAR
@@ -42,7 +45,6 @@ st.sidebar.subheader('Expenses')
 rent_value = st.sidebar.number_input("Rent (CZK)", key="rent_cost", min_value=0, max_value=1000000, value=rent_default, step=1, label_visibility = "visible")
 tax_on_rent_perc = st.sidebar.number_input("Tax (%)", key="rent_tax_percentage", min_value=0, max_value=100, value=tax_perc_default, step=1, label_visibility = "visible")
 total_rent_value = rent_value * ((100 + tax_on_rent_perc)/100)
-st.sidebar.metric("Total rent expenses", f'{int(total_rent_value):,} CZK', "with TAX", delta_color="off")
 
 buffer_expense_value = st.sidebar.number_input("Buffer (CZK)", key="buffer_expense", min_value=0, max_value=1000000, value=buffer_default, step=1, label_visibility = "visible")
 band_expense_value = st.sidebar.number_input("Band cost (CZK)", key="rent_expense", min_value=0, max_value=1000000, value=band_expense_default, step=1, label_visibility = "visible")
@@ -55,7 +57,7 @@ st.sidebar.markdown('''
 Created with ❤️ by Tomas Pycha.
 ''')
 
-st.header("ESN Prague Ball - Finantial Analysis")
+st.header("ESN Prague Ball - Financial Analysis")
 
 # MAP??
 #m = folium.Map(location =[50.0771239, 14.4399050], zoom_start=16)
@@ -127,7 +129,7 @@ with st.container():
     with col9:
         bool_esner = st.checkbox('ESNers', value=True)
     with col10:
-        price_esner = st.number_input("Price", key="ahojj", min_value=0, max_value=1000, value=200, step=1, label_visibility = "collapsed")
+        price_esner = st.number_input("Price", key="ahojj", min_value=0, max_value=1000, value=esner_ticket_price_default, step=1, label_visibility = "collapsed")
     with col11:
         number_esner_slider = st.slider("Tickets", key="slider_esner", min_value=0, max_value=1000, value=100, step=1, format=None, help=None, on_change=update_numin, label_visibility="collapsed")
     with col12:
@@ -138,7 +140,7 @@ with st.container():
     with col13:
         bool_esncard = st.checkbox('ESNcard holders', value=True)
     with col14:
-        price_esncard = st.number_input("Price", key="ahojjj", min_value=0, max_value=1000, value=500, step=1, label_visibility = "collapsed")
+        price_esncard = st.number_input("Price", key="ahojjj", min_value=0, max_value=1000, value=esncard_holder_ticket_price_default, step=1, label_visibility = "collapsed")
     with col15:
         number_esncard_slider = st.slider("Tickets", key="slider_esncard", min_value=0, max_value=1000, value=300, step=1, format=None, help=None, on_change=update_numin, label_visibility="collapsed")
     with col16:
@@ -149,7 +151,7 @@ with st.container():
     with col17:
         bool_standard = st.checkbox('Standard', value=True)
     with col18:
-        price_standard = st.number_input("Price", key="ahojjjj", min_value=0, max_value=1000, value=600, step=1, label_visibility = "collapsed")
+        price_standard = st.number_input("Price", key="ahojjjj", min_value=0, max_value=1000, value=standard_ticket_price_default, step=1, label_visibility = "collapsed")
     with col19:
         number_standard_slider = st.slider("Tickets", key="slider_standard", min_value=0, max_value=1000, value=200, step=1, format=None, help=None, on_change=update_numin, label_visibility="collapsed")
     with col20:
@@ -224,7 +226,7 @@ with col31:
     fig = go.Figure()
 
     fig.add_trace(go.Scatter(x=participants, y=income_vector, mode='lines', name='NET income'))
-    fig.add_trace(go.Scatter(x=participants, y=-expense_vector, mode='lines', name='Expenses', line=dict(color='rgb(243, 119, 0)')))
+    fig.add_trace(go.Scatter(x=participants, y=-(expense_vector+fees_vector), mode='lines', name='Expenses', line=dict(color='rgb(243, 119, 0)')))
     fig.add_trace(go.Scatter(x=participants, y=profit_vector, mode='lines', name='Balance', line=dict(color='rgb(200, 195, 30)')))
     fig.add_trace(go.Scatter(x=np.ones(len(dif_vector))*len(profit_vector), y=dif_vector, mode='lines', name='Difference', line=dict(color=dif_line_color)))
 
@@ -260,32 +262,45 @@ with col31:
 with col32:
 
     with st.container():
-        st.header('Expenses')
-        col41, col42, col43 = st.columns([1,1,1])
-        with col41:
-            st.metric("Total expenses", f'{int(expense_vector[-1]):,} CZK')
-        with col42:
-            st.metric("Total fixed expenses", f'{int(total_fix_expenses):,} CZK')
-        with col43:
-            st.metric("Total variable expenses", f'{int(variable_expense_vector[-1]):,} CZK')
-    
-    with st.container():
         st.header('Incomes')
-        col44, col45, col46 = st.columns([1,1,1])
+        col41, col42 = st.columns([1,1])
+        with col41:
+            st.metric("Total income", f'{int(income_vector[-1]):,} CZK')
+
+
+    with st.container():
+        st.header('Expenses')
+        col44, x = st.columns([1,1])
         with col44:
-            st.metric("Total NET income", f'{int(income_vector[-1]):,} CZK')
-        with col45:
-            st.metric("Total income", f'{int(income_vector[-1] + fees_vector[-1]):,} CZK')
-        with col46:
-            st.metric("Total provider fees", f'{int(fees_vector[-1]):,} CZK')
+            st.metric("Total expenses", f'{int(expense_vector[-1] + fees_vector[-1]):,} CZK')
+
     
     with st.container():
-        
-        col47, col48, col49 = st.columns([1,1,1])
+        col45, col46 = st.columns([1,1])
+        with col45:
+            st.metric("Rent expenses", f'{int(total_rent_value):,} CZK', "with TAX", delta_color="off")
+            #st.metric("Total fixed expenses", f'{int(total_fix_expenses):,} CZK')
+        with col46:
+            st.metric("Deposit", f'{int(deposit):,} CZK', "included in Rent expenses", delta_color="off")
+            #st.metric("Total fixed expenses", f'{int(total_fix_expenses):,} CZK')
 
-        with col47:
+
+    with st.container():
+        col46, col47 = st.columns([1,1])
+        with col46:
+            st.metric("Provider fees", f'{int(fees_vector[-1]):,} CZK')
+        #with col47:
+        #    st.metric("Total variable expenses", f'{int(variable_expense_vector[-1]):,} CZK')
+
+    with st.container():
+        col48, col49 = st.columns([1,1])
+        with col48:
+            st.metric("Band expenses", f'{int(band_expense_value):,} CZK')
+        with col49:
+            st.metric("Buffer expenses", f'{int(buffer_expense_value):,} CZK')
+
+    with st.container():
+        col50, col51 = st.columns([1,1])
+        with col50:
             st.header('Balance')
             st.metric("Total balance", f'{int(total_balance):,} CZK')
-        with col49:
-            st.header('Deposit')
-            st.metric("Deposit", f'{int(deposit):,} CZK')
