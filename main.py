@@ -24,9 +24,12 @@ rent_default = 98000
 tax_perc_default = 21
 
 buffer_default = 50000
-band_expense_default = 30000
+band_expense_default = 21000
 other_expenses_default = 0
 
+esner_ticket_price_default = 500
+esncard_holder_ticket_price_default = 650
+standard_ticket_price_default = 750
 
 
 # SIDEBAR
@@ -127,7 +130,7 @@ with st.container():
     with col9:
         bool_esner = st.checkbox('ESNers', value=True)
     with col10:
-        price_esner = st.number_input("Price", key="ahojj", min_value=0, max_value=1000, value=200, step=1, label_visibility = "collapsed")
+        price_esner = st.number_input("Price", key="ahojj", min_value=0, max_value=1000, value=esner_ticket_price_default, step=1, label_visibility = "collapsed")
     with col11:
         number_esner_slider = st.slider("Tickets", key="slider_esner", min_value=0, max_value=1000, value=100, step=1, format=None, help=None, on_change=update_numin, label_visibility="collapsed")
     with col12:
@@ -138,7 +141,7 @@ with st.container():
     with col13:
         bool_esncard = st.checkbox('ESNcard holders', value=True)
     with col14:
-        price_esncard = st.number_input("Price", key="ahojjj", min_value=0, max_value=1000, value=500, step=1, label_visibility = "collapsed")
+        price_esncard = st.number_input("Price", key="ahojjj", min_value=0, max_value=1000, value=esncard_holder_ticket_price_default, step=1, label_visibility = "collapsed")
     with col15:
         number_esncard_slider = st.slider("Tickets", key="slider_esncard", min_value=0, max_value=1000, value=300, step=1, format=None, help=None, on_change=update_numin, label_visibility="collapsed")
     with col16:
@@ -149,7 +152,7 @@ with st.container():
     with col17:
         bool_standard = st.checkbox('Standard', value=True)
     with col18:
-        price_standard = st.number_input("Price", key="ahojjjj", min_value=0, max_value=1000, value=600, step=1, label_visibility = "collapsed")
+        price_standard = st.number_input("Price", key="ahojjjj", min_value=0, max_value=1000, value=standard_ticket_price_default, step=1, label_visibility = "collapsed")
     with col19:
         number_standard_slider = st.slider("Tickets", key="slider_standard", min_value=0, max_value=1000, value=200, step=1, format=None, help=None, on_change=update_numin, label_visibility="collapsed")
     with col20:
