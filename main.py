@@ -58,7 +58,7 @@ st.sidebar.markdown('''
 Created with ❤️ by Tomas Pycha.
 ''')
 
-st.header("ESN Prague Ball - Finantial Analysis")
+st.header("ESN Prague Ball - Financial Analysis")
 
 # MAP??
 #m = folium.Map(location =[50.0771239, 14.4399050], zoom_start=16)
