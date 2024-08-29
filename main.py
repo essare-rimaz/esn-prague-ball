@@ -226,7 +226,7 @@ with col31:
     fig = go.Figure()
 
     fig.add_trace(go.Scatter(x=participants, y=income_vector, mode='lines', name='NET income'))
-    fig.add_trace(go.Scatter(x=participants, y=-expense_vector, mode='lines', name='Expenses', line=dict(color='rgb(243, 119, 0)')))
+    fig.add_trace(go.Scatter(x=participants, y=-(expense_vector+fees_vector), mode='lines', name='Expenses', line=dict(color='rgb(243, 119, 0)')))
     fig.add_trace(go.Scatter(x=participants, y=profit_vector, mode='lines', name='Balance', line=dict(color='rgb(200, 195, 30)')))
     fig.add_trace(go.Scatter(x=np.ones(len(dif_vector))*len(profit_vector), y=dif_vector, mode='lines', name='Difference', line=dict(color=dif_line_color)))
 
