@@ -20,6 +20,8 @@ with open(css_path) as f:
 # DEFAULTS
 provider_percentage_default = 7.00
 ticket_fee_default = 6.50
+tax_ticket_default = 12
+
 rent_default = 98000
 tax_perc_default = 21
 
@@ -40,6 +42,7 @@ st.sidebar.subheader('Tickets')
 bool_apply_fees = st.sidebar.checkbox('Apply fees', value=True)
 provider_percentage_value = st.sidebar.number_input("Provider's share (%)", key="provider_percentage", min_value=0.00, max_value=100.00, value=provider_percentage_default, step=0.01, label_visibility = "visible")
 ticket_fee_value = st.sidebar.number_input("Ticket fee (CZK)", key="ticket_fee", min_value=0.00, max_value=100.00, value=ticket_fee_default, step=0.01, label_visibility = "visible")
+tax_on_ticket_value = st.sidebar.number_input("Tax on ticket (%)", key="ticket_tax", min_value=0, max_value=100, value=tax_ticket_default, step=1, label_visibility = "visible")
 
 st.sidebar.subheader('Expenses')
 rent_value = st.sidebar.number_input("Rent (CZK)", key="rent_cost", min_value=0, max_value=1000000, value=rent_default, step=1, label_visibility = "visible")
@@ -190,22 +193,28 @@ fees_vector = []
 income_vector = np.array(income_vector)
 variable_expense_vector = np.array(variable_expense_vector)
 fees_vector = np.array(fees_vector)
+tax_on_tickets_vector = np.array(fees_vector)
 
 for i in range(len(price_by_category)):
     if category_bools[i]:
         if price_by_category[i] > 0:
-            income_vector = np.append(income_vector, np.ones(n_tickets_by_category[i]) * price_by_category[i] * (100-provider_percentage_value)/100 - ticket_fee_value)
+            income_vector = np.append(income_vector, np.ones(n_tickets_by_category[i]) * price_by_category[i])   ### * (1 - (provider_percentage_value/100) - (tax_on_ticket_value/100)) - ticket_fee_value)
             fees_vector = np.append(fees_vector, np.ones(n_tickets_by_category[i]) * price_by_category[i] * (provider_percentage_value)/100 + ticket_fee_value)
+            tax_on_tickets_vector = np.append(tax_on_tickets_vector, np.ones(n_tickets_by_category[i]) * price_by_category[i] * (tax_on_ticket_value)/(100 + tax_on_ticket_value))
             variable_expense_vector = np.append(variable_expense_vector, np.ones(n_tickets_by_category[i])*extra_expense_by_category[i])
         else:
             income_vector = np.append(income_vector, np.ones(n_tickets_by_category[i]) * price_by_category[i])
             fees_vector = np.append(fees_vector, np.ones(n_tickets_by_category[i]) * price_by_category[i])
+            tax_on_tickets_vector = np.append(tax_on_tickets_vector, np.ones(n_tickets_by_category[i]) * price_by_category[i])
             variable_expense_vector = np.append(variable_expense_vector, np.ones(n_tickets_by_category[i])*extra_expense_by_category[i])
             
 income_vector = np.cumsum(income_vector)
 variable_expense_vector = np.cumsum(variable_expense_vector)
-expense_vector = variable_expense_vector + np.ones(len(variable_expense_vector)) * total_fix_expenses
 fees_vector = np.cumsum(fees_vector)
+tax_on_tickets_vector = np.cumsum(tax_on_tickets_vector)
+
+expense_vector = variable_expense_vector + np.ones(len(variable_expense_vector)) * total_fix_expenses + fees_vector + tax_on_tickets_vector
+print(expense_vector[-1], variable_expense_vector[-1], total_fix_expenses, fees_vector[-1], tax_on_tickets_vector[-1])
 profit_vector = np.subtract(income_vector, expense_vector[:len(income_vector)])
 
 total_balance = int(profit_vector[-1])
@@ -226,7 +235,7 @@ with col31:
     fig = go.Figure()
 
     fig.add_trace(go.Scatter(x=participants, y=income_vector, mode='lines', name='NET income'))
-    fig.add_trace(go.Scatter(x=participants, y=-(expense_vector+fees_vector), mode='lines', name='Expenses', line=dict(color='rgb(243, 119, 0)')))
+    fig.add_trace(go.Scatter(x=participants, y=-expense_vector, mode='lines', name='Expenses', line=dict(color='rgb(243, 119, 0)')))
     fig.add_trace(go.Scatter(x=participants, y=profit_vector, mode='lines', name='Balance', line=dict(color='rgb(200, 195, 30)')))
     fig.add_trace(go.Scatter(x=np.ones(len(dif_vector))*len(profit_vector), y=dif_vector, mode='lines', name='Difference', line=dict(color=dif_line_color)))
 
@@ -272,7 +281,7 @@ with col32:
         st.header('Expenses')
         col44, x = st.columns([1,1])
         with col44:
-            st.metric("Total expenses", f'{int(expense_vector[-1] + fees_vector[-1]):,} CZK')
+            st.metric("Total expenses", f'{int(expense_vector[-1]):,} CZK')
 
     
     with st.container():
@@ -289,8 +298,8 @@ with col32:
         col46, col47 = st.columns([1,1])
         with col46:
             st.metric("Provider fees", f'{int(fees_vector[-1]):,} CZK')
-        #with col47:
-        #    st.metric("Total variable expenses", f'{int(variable_expense_vector[-1]):,} CZK')
+        with col47:
+            st.metric("Tax on tickets", f'{int(tax_on_tickets_vector[-1]):,} CZK')
 
     with st.container():
         col48, col49 = st.columns([1,1])
