@@ -18,20 +18,20 @@ with open(css_path) as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 # DEFAULTS
-provider_percentage_default = 7.00
-ticket_fee_default = 6.50
+provider_percentage_default = 4.9
+ticket_fee_default = 2.9
 tax_ticket_default = 12
 
-rent_default = 98000
+rent_default = 102760
 tax_perc_default = 21
 
 buffer_default = 50000
 band_expense_default = 21000
 other_expenses_default = 0
 
-esner_ticket_price_default = 500
-esncard_holder_ticket_price_default = 650
-standard_ticket_price_default = 750
+esner_ticket_price_default = 549
+esncard_holder_ticket_price_default = 649
+standard_ticket_price_default = 749
 
 
 # SIDEBAR
